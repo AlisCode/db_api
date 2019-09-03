@@ -25,7 +25,7 @@ The basic workflow should be as follows :
 * The user creates his model using Diesel 
 * The user annotates his model structs using the procedural macros 
 * The user optionally creates his own repository around a particular struct by implementing the Repository trait. 
-* Using various Route exporters, the user transforms the framework's backend-agnostic routes into fully usable routes for any given backend. Support for any web framework should be feature-gated. 
+* Using various Route exporters, the user transforms the framework's backend-agnostic routes into fully usable routes for any given backend. Support for any web framework should be feature-gated or put in a separate crate. 
 * The user mounts the previously generated routes in the application, either by hand or using macros. 
 
 ### Route abstraction
