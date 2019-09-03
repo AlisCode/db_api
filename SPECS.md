@@ -40,6 +40,28 @@ The base framework:
 | ( App )     | (mount)	+---------------+
 +-------------+
 
+# Endpoints / Routes
+
+Endpoints are structures capable of holding the logic on the web-server side. They are the combination of : 
+
+* an URL, or route
+* an HTTP Method
+* a list of parameters (arguments matched in the route)
+* a "handler", or logic to give an HTTP Response as an answer 
+
+# HTTP Responses
+
+Endpoints should return HTTP responses
+
+Each framework has its own implementation of responders - types that 
+they are able to transform and return as an HTTP Response. 
+
+The handler for the endpoint, defined in the Repository, should return an element that is then returned by the service.
+ 
+# Pipelines - Hooks 
+
+Pipelines are user-defined. They specify a way to handle a request on a given endpoint. They are given a reference to the repository, and they can pass informations to one another, so as to e.g. validate inputs, or log informations accordingly. They are defined at the repository level so that every route of the same repository will be subject to the same pre-treatment.
+
 # MVP
 
 * Routes abstraction 
@@ -162,7 +184,7 @@ Starting with the same Diesel model, we can define a service with a bit more log
 #[poster = "InsertableHero"]
 #[id_field = "HeroId"]
 #[url = "/better/heros"]
-#[pipeline = ["AddOneHook", "default"]]
+#[pipeline = ["AddOneHook"]]
 pub struct BetterHeroRepository {
 	requests: Arc<Mutex<u32>>,
 }
