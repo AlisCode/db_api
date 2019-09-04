@@ -49,6 +49,36 @@ Endpoints are structures capable of holding the logic on the web-server side. Th
 * a list of parameters (arguments matched in the route)
 * a "handler", or logic to give an HTTP Response as an answer 
 
+```rust
+struct EmailValidator {
+	rgx: string,
+}	
+
+impl<'a> Hook<BetterHeroRepository> for EmailValidator {
+	type Output = ();
+	type Input = ();
+	/// ... 
+}
+
+pub struct BetterHeroRepository {
+	requests: Arc<Mutex<u32>>,
+	email_validator: EmailValidator,
+}
+
+
+#[method = "get"]
+#[url = "/count"]
+#[pre_hooks = ["email_validator", "phone_number_validator"]]
+pub fn count_route(&self) -> HTTPResponse {
+	let lock = self.request.lock().unwrap();
+	RouteResponse {
+		content: format!("This service has been called {} times", lock),
+		status: 200,
+	}
+}
+```
+
+
 # HTTP Responses
 
 Endpoints should return HTTP responses
@@ -60,7 +90,14 @@ The handler for the endpoint, defined in the Repository, should return an elemen
  
 # Pipelines - Hooks 
 
-Pipelines are user-defined. They specify a way to handle a request on a given endpoint. They are given a reference to the repository, and they can pass informations to one another, so as to e.g. validate inputs, or log informations accordingly. They are defined at the repository level so that every route of the same repository will be subject to the same pre-treatment.
+Pipelines are user-defined. They specify a way to handle a request on a given endpoint. They are given a reference to the repository, and they can pass informations to one another, so as to e.g. validate inputs, or log informations accordingly. 
+
+They are defined at the route level.
+
+# Database access
+
+trait GetDBAccess ? 
+logging ? 
 
 # MVP
 
@@ -73,6 +110,13 @@ Pipelines are user-defined. They specify a way to handle a request on a given en
 * Two web-framework backends supported
 	* Rocket
 	* actix-web 
+* Hooks
+
+# Afterwards
+
+* Async IO
+	* DB
+	* Pipeline
 
 # What is generated and used when
 
