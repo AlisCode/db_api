@@ -26,19 +26,19 @@ The base framework:
 | Repository |----------->| Routes |
 +------------+            +--------+
      ^ Codegenerates          | Give to 
-     |			      v
-+-------------+		+-----------+
-| User config |		| Exporters |
-| for a repo  |		+-----------+
+     |                        v
++-------------+         +-----------+
+| User config |         | Exporters |
+| for a repo  |         +-----------+
 +-------------+           |   |   | Forms for each repository 
-      |			+-----------+
-      |			|  Service  |
-      |	defines		+-----------+
-      |			      | provides		
-      |   	 	+---------------+
-+-------------+   use	| Web framework |
-| User code   |<------->| endpoints 	|
-| ( App )     | (mount)	+---------------+
+      |                 +-----------+
+      |                 |  Service  |
+      | defines         +-----------+
+      |                       | provides                 
+      |                 +---------------+
++-------------+   use   | Web framework |
+| User code   |<------->| endpoints     |
+| ( App )     | (mount) +---------------+
 +-------------+
 ```
 
