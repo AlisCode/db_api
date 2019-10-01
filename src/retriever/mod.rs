@@ -1,9 +1,6 @@
-pub trait Retriever<Backend, T, Error> {
-    fn retrieve(&self, backend: &Backend) -> Result<T, Error>;
-}
-
-pub trait BorrowRetriever<'a, 'r, Backend, T, Error> {
-    fn retrieve(&self, backend: &Backend) -> Result<BorrowedParam<'r, T>, Error>;
+pub trait Retriever<'a, Backend, Error> {
+    type Output;
+    fn retrieve(&'a self, backend: &'a Backend) -> Result<Self::Output, Error>;
 }
 
 pub struct NamedParamRetriever<T> {
@@ -28,10 +25,6 @@ pub struct StateRetriever<T> {
 #[derive(Default)]
 pub struct BodyRetriever<T> {
     _phantom: std::marker::PhantomData<T>,
-}
-
-pub struct BorrowedParam<'r, T> {
-    pub inner: &'r T,
 }
 
 #[cfg(feature = "rocket")]
