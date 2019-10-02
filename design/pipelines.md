@@ -18,8 +18,6 @@ They are given a reference to the repository they are currently acting on, so as
 
 Hooks are structures owned by a given repository. In the `Repository::handle()` implementation, one must ensure that these are called in the correct order, even though the type-system should provide some sort of safety.
 
-It should be noted that while pre-hooks (Hooks executed *before* the matching route's logic) can pretty much arrange data how they want,
-
 ### Validators 
 
 Validators are structures applied on particular routes of a given repository. They allow to check for some condition, e.g. making sure that an email is properly formatted.

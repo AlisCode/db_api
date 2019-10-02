@@ -6,7 +6,7 @@ Services are to be implemented independently for each supported Web-Framework. T
 
 The only kind of state they sould own is backend-specific configuration. They should be created and consumed immediately to be used at the creation of the application in order to mount routes on the app's server. 
 
-The role of a service is to expose a repository by mouting the routes that it  provides (e.g. via its `routes()` implementation).
+The role of a service is to expose a repository by mouting the routes that it provides (via its `mount(m: Mounter, base: &str)` implementation).
 
 ## Implementation details
 

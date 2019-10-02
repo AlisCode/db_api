@@ -23,6 +23,16 @@ In order to represent the HTTP Method, we should use the `http` crate.
 
 Handler code should be written by hand in an impl block of the Repository.
 
+Each Route must be declared as a Struct. Said struct will implement IntoEndpoint.
+It has the responsibility to call the pipeline in order.  
+
+IntoEndpoint has 3 associated types : 
+* Input : the type of the input to be retrieved by the endpoint **before** going in the pipeline
+* Params : the type of input for the logic handler defined by the function
+* Response : the type returned by the Endpoint
+
+Each Route implemented that way has to provide a `fn retrieve(backend: &Backend) -> Input`
+
 ### Avoiding boilerplate 
 
 `Routes` have to provide the URL on which they are going to be matching. 
