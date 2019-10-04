@@ -4,17 +4,28 @@ use rocket::data::{FromData, Transform};
 use std::borrow::Borrow;
 use std::sync::{Arc, Mutex};
 
-use crate::retriever::{BodyRetriever, NamedParamRetriever, Retriever, StateRetriever};
+use crate::retriever::{BodyRetriever, NamedParamRetriever, Retriever, RetrieverBackend, StateRetriever};
 
 pub struct RocketRetriever<'r> {
-    request: Request<'r>,
+    request: &'r Request<'r>,
     data: Arc<Mutex<Option<Data>>>,
+}
+
+impl<'r> RocketRetriever<'r> {
+    pub fn new(request: &'r Request<'r>, data: Data) -> Self {
+        RocketRetriever {
+            request,
+            data: Arc::new(Mutex::new(Some(data))),
+        }
+    }
 }
 
 pub enum RocketRetrieverError {
     Mismatch,
     Error,
 }
+
+impl<'r> RetrieverBackend for RocketRetriever<'r> {}
 
 /// 'a is the lifetime of the request, 
 /// 'r is the lifetime of the borrowed object

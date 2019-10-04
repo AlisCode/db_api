@@ -25,3 +25,7 @@ No mutable access should be given to the backend, so as to potentially parse all
 
 Backends should use interior mutability if needed.
 Each feature-gate hides the implementation of these retrievers, so as not to bloat the library.
+
+## Problems
+
+* Interior mutability on Backends : is it needed ? 

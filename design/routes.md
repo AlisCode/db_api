@@ -50,3 +50,8 @@ To indicate the HTTP method of a route, one should mark a route with *e.g* `#[me
 The handler code will be the core of a tagged function.
 
 Passing parameters to a Route is done by passing parameters in the function. 
+
+## Problems
+
+* Do we lose Rocket's routing system ?
+* Executor system ?
