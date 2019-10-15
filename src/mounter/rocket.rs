@@ -31,12 +31,12 @@ pub struct RocketHandler<Input, Resp, InputRetriever> {
 
 impl<'a,'r: 'a, I, R, IR> Handler for RocketHandler<I, R, IR> 
     where R: Responder<'r>, 
-    I: Clone + Send + Sync,
-    R: Clone + Send + Sync,
-    IR: 'a + Retriever<'a, RocketRetriever<'a, 'r>, RocketRetrieverError, Output = I> + Clone {
-    fn handle(&self, req: &'r Request, data: Data) -> Outcome<'r> {
+    I: Clone + Send + Sync + 'static,
+    R: Clone + Send + Sync + 'static,
+    IR: 'a + 'static + Retriever<'a, RocketRetriever<'a, 'r>, RocketRetrieverError, Output = I> + Clone  {
+    fn handle<'s>(&self, req: &'s Request, data: Data) -> Outcome<'s> {
         let retrievers = (self.retrievers)();
-        let backend: RocketRetriever<'a, 'r> = RocketRetriever::new(req, data); 
+        let backend: RocketRetriever = RocketRetriever::new(req, data); 
         let input: Result<I, RocketRetrieverError> = retrievers.retrieve(&backend);
         match input {
             Ok(i) => Outcome::from(req, (self.handler)(i)),
