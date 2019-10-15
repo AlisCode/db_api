@@ -4,7 +4,7 @@ use crate::mounter::Mounter;
 use crate::endpoint::Endpoint;
 use crate::service::Service;
 
-use rocket::{Request, Data};
+use rocket::{Handler, Request, Route, Data};
 use rocket::response::Responder;
 use rocket::handler::Outcome;
 
@@ -13,31 +13,47 @@ pub struct RocketMounter<'a, 'r> {
     _lifetime_request: std::marker::PhantomData<&'r str>,
 }
 
-impl<'a, 'r> Mounter for RocketMounter<'a, 'r> {
-    type Back = RocketRetriever<'r>;
+impl<'a, 'r: 'a> Mounter for RocketMounter<'a, 'r> {
+    type Back = RocketRetriever<'a, 'r>;
 
     fn mount_service<S: Service<Self>>(&mut self, service: S) {
        service.mount_service(self); 
     }
 }
 
-impl<'a, 'r, I, P, R, M, InputRetriever> Service<RocketMounter<'a, 'r>> for Endpoint<I, P, R, *const M, InputRetriever> 
+#[derive(Clone)]
+pub struct RocketHandler<Input, Resp, InputRetriever> {
+    method: rocket::http::Method,
+    url: String,
+    pub handler: fn(Input) -> Resp,
+    pub retrievers: fn() -> InputRetriever
+}
+
+impl<'a,'r: 'a, I, R, IR> Handler for RocketHandler<I, R, IR> 
     where R: Responder<'r>, 
-    InputRetriever: Retriever<'a, RocketRetriever<'r>, RocketRetrieverError, Output = I> 
+    I: Clone + Send + Sync,
+    R: Clone + Send + Sync,
+    IR: 'a + Retriever<'a, RocketRetriever<'a, 'r>, RocketRetrieverError, Output = I> + Clone {
+    fn handle(&self, req: &'r Request, data: Data) -> Outcome<'r> {
+        let retrievers = (self.retrievers)();
+        let backend: RocketRetriever<'a, 'r> = RocketRetriever::new(req, data); 
+        let input: Result<I, RocketRetrieverError> = retrievers.retrieve(&backend);
+        match input {
+            Ok(i) => Outcome::from(req, (self.handler)(i)),
+            Err(e) => Outcome::failure(rocket::http::Status::InternalServerError),
+        }
+    }
+}
+
+impl<'a,'r: 'a, I, P, R, M, InputRetriever: 'a> Service<RocketMounter<'a, 'r>> for Endpoint<I, P, R, *const M, InputRetriever> 
+    where R: Responder<'r>, 
+    InputRetriever: Retriever<'a, RocketRetriever<'a, 'r>, RocketRetrieverError, Output = I> 
     {
     fn mount_service(self, mounter: &mut RocketMounter<'a, 'r>) {
         // Transforms the endpoint into a specific Route
         // Calls implementation-specific functions to mount
         // said route into the final application 
-        let handler = |req: &'a Request<'r>, data: Data| {
-            let retrievers = (self.retrievers)();
-            let backend: RocketRetriever<'r> = RocketRetriever::new(req, data); 
-            let input: Result<I, RocketRetrieverError> = retrievers.retrieve(&backend);
-            let res = match input {
-                Ok(i) => Outcome::from(req, (self.handler)(i)),
-                Err(e) => Outcome::failure(rocket::http::Status::InternalServerError),
-            }; 
-        };
-        unimplemented!();
+        //let route = Route::new(rocket::http::Method::Get, self.url.clone(), self);
+        unimplemented!()
     } 
 }
