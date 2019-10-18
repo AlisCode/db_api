@@ -8,7 +8,9 @@ edition = "2018"
 
 [dependencies]
 http = "0.1.18"
+serde = { version = "1.0.101", features = ["derive"] }
 rocket = { version = "0.4.2", optional = true }
+rocket_contrib = { version = "0.4.2", optional = true }
 
 [features]
-rocket_integ = ["rocket"]
+rocket_integ = ["rocket", "rocket_contrib"]
