@@ -1,0 +1,66 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'db_api'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=db_api"
+                ],
+                "filter": {
+                    "name": "db_api",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'rocket'",
+            "cargo": {
+                "args": [
+                    "+nightly",
+                    "build",
+                    "--example=rocket",
+                    "--package=db_api",
+                    "--features=rocket_integ"
+                ],
+                "filter": {
+                    "name": "rocket",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'rocket'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=rocket",
+                    "--package=db_api"
+                ],
+                "filter": {
+                    "name": "rocket",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
