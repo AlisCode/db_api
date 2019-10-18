@@ -108,13 +108,13 @@ impl<'a, 'r, T> Retriever<RocketRetriever<'a, 'r>, RocketRetrieverError> for Uni
 where
     T: Send + Sync + 'static,
 {
-    type Output = &'r T;
+    type Output = Arc<T>;
     fn retrieve(
         &self,
         backend: &RocketRetriever<'a, 'r>,
     ) -> Result<Self::Output, RocketRetrieverError> {
-        match backend.request.guard::<'a, State<'r, T>>() {
-            Outcome::Success(s) => Ok(s.inner()),
+        match backend.request.guard::<'a, State<'r, Arc<T>>>() {
+            Outcome::Success(s) => Ok(s.inner().clone()),
             Outcome::Forward(_) => Err(RocketRetrieverError::Mismatch),
             Outcome::Failure(_) => Err(RocketRetrieverError::Error),
         }
