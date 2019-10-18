@@ -19,3 +19,6 @@ where
 
 #[cfg(feature = "rocket_integ")]
 pub mod rocket;
+
+#[cfg(feature = "rocket_integ")]
+pub mod rocket_other;
