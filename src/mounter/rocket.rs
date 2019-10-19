@@ -3,10 +3,10 @@ use rocket::handler::Outcome;
 use rocket::response::Responder;
 use rocket::{Handler, Request, Rocket, Route};
 
-use crate::endpoint::Endpoint;
+use crate::endpoint::{Endpoint, GenericEndpoint};
 use crate::mounter::Mounter;
 use crate::retriever::rocket::{RocketRetriever, RocketRetrieverError};
-use crate::retriever::{Retriever, RetrieverBackend};
+use crate::retriever::Retriever;
 use crate::service::Service;
 
 #[derive(Clone)]
@@ -28,7 +28,7 @@ where
         let input: Result<I, RocketRetrieverError> = retrievers.retrieve(&backend);
         match input {
             Ok(i) => Outcome::from(req, (self.handler)(i)),
-            Err(e) => Outcome::failure(rocket::http::Status::InternalServerError),
+            Err(_e) => Outcome::failure(rocket::http::Status::InternalServerError),
         }
     }
 }
@@ -82,8 +82,8 @@ impl<'a, 'r: 'a> Mounter for RocketMounter<'a, 'r> {
     }
 }
 
-impl<'a, 'r: 'a, I, R, M, InputRetriever> Service<RocketMounter<'a, 'r>>
-    for Endpoint<I, R, *const M, InputRetriever>
+impl<'a, 'r: 'a, I, R, InputRetriever> Service<RocketMounter<'a, 'r>>
+    for Endpoint<I, R, RocketMounter<'a, 'r>, InputRetriever>
 where
     for<'s> R: Responder<'s>,
     for<'aa, 'rr> InputRetriever:
@@ -99,6 +99,19 @@ where
         let rocket_handler = RocketHandler::new(handler, retrievers);
         let route = Route::new(http_into_rocket_method(method), &url, rocket_handler);
         mounter.add_route("/", route);
+    }
+}
+
+impl<'a, 'b, Input, Resp, InputRetriever> GenericEndpoint<Input, Resp, InputRetriever> {
+    /// Types the GenericEndpoint to be used by Rocket
+    pub fn rocket(self) -> Endpoint<Input, Resp, RocketMounter<'a, 'b>, InputRetriever> {
+        let GenericEndpoint {
+            url,
+            method,
+            handler,
+            retrievers,
+        } = self;
+        Endpoint::new(url, method, handler, retrievers)
     }
 }
 

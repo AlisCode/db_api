@@ -1,5 +1,4 @@
 use rocket::data::{FromData, Transform};
-use rocket::request::{FromParam, FromRequest};
 use rocket::{Data, Outcome, Request, State};
 use rocket_contrib::json::Json;
 use serde::Deserialize;
@@ -7,8 +6,7 @@ use std::borrow::Borrow;
 use std::sync::{Arc, Mutex};
 
 use crate::retriever::{
-    BodyRetriever, DeserializeRetriever, IndexedParamRetriever, Retriever, RetrieverBackend,
-    StateRetriever, UniqueStateRetriever,
+    BodyRetriever, DeserializeRetriever, Retriever, RetrieverBackend, UniqueStateRetriever,
 };
 
 pub struct RocketRetriever<'a, 'r> {

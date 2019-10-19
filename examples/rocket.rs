@@ -1,10 +1,9 @@
-use db_api::endpoint::Endpoint;
+use db_api::endpoint::GenericEndpoint;
 use db_api::mounter::rocket::RocketMounter;
 use db_api::mounter::Mounter;
 use db_api::retriever::{BodyRetriever, DeserializeRetriever, UniqueStateRetriever};
 use http::Method;
-use rocket::response::Responder;
-use rocket::{Rocket, Route};
+use rocket::Rocket;
 use serde::{Deserialize, Serialize};
 
 use std::sync::{Arc, Mutex};
@@ -86,39 +85,14 @@ fn retrievers_count_deser() -> (UniqueStateRetriever<Counter>, DeserializeRetrie
 }
 
 fn main() {
-    /*
-    let my_handler = RocketHandlerOther::new(Method::Get, "/test".into(), handle, retrievers);
-    let my_handler_route = Route::new(Method::Get, "/test", my_handler);
-
-    let my_handler_a =
-        RocketHandlerOther::new(Method::Get, "/testa".into(), handle_a, retrievers_a);
-    let my_handler_a_route = Route::new(Method::Get, "/testa", my_handler_a);
-
-    let my_handler_str =
-        RocketHandlerOther::new(Method::Get, "/teststr".into(), handle_str, retrievers_str);
-    let my_handler_str_route = Route::new(Method::Get, "/teststr", my_handler_str);
-
-    let retriever: UniqueStateRetriever<Counter> = UniqueStateRetriever::new();
-
-    let my_handler_counter =
-        RocketHandlerOther::new(Method::Get, "/count".into(), handle_count, retrievers_count);
-    let my_handler_counter_route = Route::new(Method::Get, "/count", my_handler_counter);
-
-    let my_handler_counter_deser = RocketHandlerOther::new(
-        Method::Post,
-        "/count_deser".into(),
-        handle_count_deser,
-        retrievers_count_deser,
-    );
-    let my_handler_counter_deser_route =
-        Route::new(Method::Post, "/count_deser", my_handler_counter_deser);
-    */
-    let endpoint_test = Endpoint::new_rocket("/test".into(), Method::GET, handle, retrievers);
+    let endpoint_test = GenericEndpoint::new("/test".into(), Method::GET, handle, retrievers);
+    let endpoint_str =
+        GenericEndpoint::new("/test_str".into(), Method::GET, handle_str, retrievers_str);
     let endpoint_deser_a =
-        Endpoint::new_rocket("/deser".into(), Method::POST, handle_a, retrievers_a);
+        GenericEndpoint::new("/deser".into(), Method::POST, handle_a, retrievers_a);
     let endpoint_counter =
-        Endpoint::new_rocket("/count".into(), Method::GET, handle_count, retrievers_count);
-    let endpoint_counter_deser = Endpoint::new_rocket(
+        GenericEndpoint::new("/count".into(), Method::GET, handle_count, retrievers_count);
+    let endpoint_counter_deser = GenericEndpoint::new(
         "/count_deser".into(),
         Method::POST,
         handle_count_deser,
@@ -126,9 +100,12 @@ fn main() {
     );
 
     let rocket = Rocket::ignite().manage(Arc::new(Counter::new()));
-    let mounter = RocketMounter::new(rocket);
-    mounter.mount_service(endpoint_test);
-    mounter.mount_service(endpoint_deser_a);
-    mounter.mount_service(endpoint_counter);
-    mounter.mount_service(endpoint_counter_deser);
+    let mut mounter = RocketMounter::new(rocket);
+    mounter.mount_service(endpoint_test.rocket());
+    mounter.mount_service(endpoint_str.rocket());
+    mounter.mount_service(endpoint_deser_a.rocket());
+    mounter.mount_service(endpoint_counter.rocket());
+    mounter.mount_service(endpoint_counter_deser.rocket());
+    let rocket = mounter.finish();
+    rocket.launch();
 }

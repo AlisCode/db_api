@@ -9,7 +9,7 @@ pub trait Retriever<Backend, Error> {
 
 impl<Backend, Error> Retriever<Backend, Error> for () {
     type Output = ();
-    fn retrieve<'a>(&'a self, backend: &'a Backend) -> std::result::Result<Self::Output, Error> {
+    fn retrieve<'a>(&'a self, _backend: &'a Backend) -> std::result::Result<Self::Output, Error> {
         Ok(())
     }
 }
@@ -39,14 +39,14 @@ impl_retriever_multiple!(A, B, C, D, E, F, G);
 impl_retriever_multiple!(A, B, C, D, E, F, G, H);
 
 pub struct IndexedParamRetriever<T> {
-    index: usize,
+    _index: usize,
     _phantom: std::marker::PhantomData<T>,
 }
 
 impl<T> IndexedParamRetriever<T> {
     pub fn new(index: usize) -> Self {
         IndexedParamRetriever {
-            index,
+            _index: index,
             _phantom: std::marker::PhantomData,
         }
     }
