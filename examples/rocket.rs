@@ -1,6 +1,7 @@
 use db_api::endpoint::GenericEndpoint;
 use db_api::mounter::rocket::RocketMounter;
 use db_api::mounter::Mounter;
+use db_api::retriever::IndexedParamRetriever;
 use db_api::retriever::{BodyRetriever, DeserializeRetriever, UniqueStateRetriever};
 use http::Method;
 use rocket::Rocket;
@@ -12,7 +13,7 @@ use std::sync::{Arc, Mutex};
 fn handle(_unit: ()) -> String {
     "Handled!".to_owned()
 }
-fn retrievers() -> () {}
+fn retrievers() {}
 
 // Deserialize handler
 #[derive(Serialize, Deserialize, Clone)]
@@ -53,13 +54,13 @@ impl Counter {
 
     pub fn count(&self) -> u32 {
         let mut val = self.val.lock().unwrap();
-        *val = *val + 1;
+        *val += 1;
         *val
     }
 
     pub fn add_val(&self, v: u32) -> u32 {
         let mut val = self.val.lock().unwrap();
-        *val = *val + v;
+        *val += v;
         *val
     }
 }
@@ -84,6 +85,15 @@ fn retrievers_count_deser() -> (UniqueStateRetriever<Counter>, DeserializeRetrie
     (UniqueStateRetriever::new(), DeserializeRetriever::new())
 }
 
+// URL Param
+fn handle_url_param(a: u32) -> String {
+    format!("The value is {}", a)
+}
+
+fn retrievers_url_param() -> IndexedParamRetriever<u32> {
+    IndexedParamRetriever::new(1)
+}
+
 fn main() {
     let endpoint_test = GenericEndpoint::new("/test".into(), Method::GET, handle, retrievers);
     let endpoint_str =
@@ -98,6 +108,12 @@ fn main() {
         handle_count_deser,
         retrievers_count_deser,
     );
+    let endpoint_url_param = GenericEndpoint::new(
+        "/param/<id>".into(),
+        Method::GET,
+        handle_url_param,
+        retrievers_url_param,
+    );
 
     let rocket = Rocket::ignite().manage(Arc::new(Counter::new()));
     let mut mounter = RocketMounter::new(rocket);
@@ -106,6 +122,7 @@ fn main() {
     mounter.mount_service(endpoint_deser_a.rocket());
     mounter.mount_service(endpoint_counter.rocket());
     mounter.mount_service(endpoint_counter_deser.rocket());
+    mounter.mount_service(endpoint_url_param.rocket());
     let rocket = mounter.finish();
     rocket.launch();
 }

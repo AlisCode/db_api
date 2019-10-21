@@ -39,14 +39,14 @@ impl_retriever_multiple!(A, B, C, D, E, F, G);
 impl_retriever_multiple!(A, B, C, D, E, F, G, H);
 
 pub struct IndexedParamRetriever<T> {
-    _index: usize,
+    index: usize,
     _phantom: std::marker::PhantomData<T>,
 }
 
 impl<T> IndexedParamRetriever<T> {
     pub fn new(index: usize) -> Self {
         IndexedParamRetriever {
-            _index: index,
+            index: index,
             _phantom: std::marker::PhantomData,
         }
     }

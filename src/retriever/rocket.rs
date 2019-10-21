@@ -1,4 +1,5 @@
 use rocket::data::{FromData, Transform};
+use rocket::request::FromParam;
 use rocket::{Data, Outcome, Request, State};
 use rocket_contrib::json::Json;
 use serde::Deserialize;
@@ -6,7 +7,8 @@ use std::borrow::Borrow;
 use std::sync::{Arc, Mutex};
 
 use crate::retriever::{
-    BodyRetriever, DeserializeRetriever, Retriever, RetrieverBackend, UniqueStateRetriever,
+    BodyRetriever, DeserializeRetriever, IndexedParamRetriever, Retriever, RetrieverBackend,
+    UniqueStateRetriever,
 };
 
 pub struct RocketRetriever<'a, 'r> {
@@ -119,11 +121,21 @@ where
     }
 }
 
-/*
 impl<'a, 'r, T> Retriever<RocketRetriever<'a, 'r>, RocketRetrieverError>
     for IndexedParamRetriever<T>
 where
-    T: FromParam,
+    T: FromParam<'a>,
 {
+    type Output = T;
+    fn retrieve(
+        &self,
+        backend: &RocketRetriever<'a, 'r>,
+    ) -> Result<Self::Output, RocketRetrieverError> {
+        let res = backend.request.get_param(self.index);
+        match res {
+            Some(Ok(t)) => Ok(t),
+            Some(Err(e)) => Err(RocketRetrieverError::Error),
+            _ => Err(RocketRetrieverError::Mismatch),
+        }
+    }
 }
-*/
