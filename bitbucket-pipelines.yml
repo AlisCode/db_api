@@ -1,0 +1,36 @@
+definitions:
+  services:
+    postgres:
+      image: postgres:10.5-alpine
+      variables:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: passwd
+  steps: 
+    - step: &db_api_check
+        name: Check that the base crate compiles
+        script: 
+          - cd db_api
+          - cargo fmt -v --all -- --check
+          - cargo audit
+          - cargo build --release
+          - cargo test --release
+    - step: &db_api_rocket
+        name: Check that Rocket Integration works
+        services: 
+          - postgres
+        script: 
+          - cd rocket_example
+          - cargo fmt -v --all -- --check
+          - cargo audit
+          - cargo build --release
+          - cargo test --release
+
+image: imperocom/impero_rs
+
+pipelines:
+  default:
+    - parallel:
+      - step:
+          <<: *db_api_check
+      - step:
+          <<: *db_api_rocket
