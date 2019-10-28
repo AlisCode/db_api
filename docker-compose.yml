@@ -1,0 +1,28 @@
+version: '3.6'
+
+services:
+  db_api_postgres:
+    image: postgres:10.5-alpine
+    command: postgres -c 'config_file=/etc/postgresql/postgresql.conf'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: passwd
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+      - ${BITBUCKET_CLONE_DIR:-.}/postgresql.conf:/etc/postgresql/postgresql.conf
+    ports:
+      - 5432:5432
+
+  db_api:
+    image: imperocom/impero_rs
+    volumes:
+      - ${BITBUCKET_CLONE_DIR:-.}:/usr/src/impero:delegated
+    environment:
+      RUST_BACKTRACE: 1
+    tty: true
+    depends_on:
+      - db_api_postgres
+
+volumes:
+  postgres_data:
+

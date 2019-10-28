@@ -1,2 +1,2 @@
 [global.databases]
-rocket_example_sqlite = { url = "rocket_example.db" }
+rocket_example_pgsql = { url = "postgres://postgres:passwd@localhost" }

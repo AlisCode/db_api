@@ -1,8 +1,8 @@
 table! {
     hero (id) {
-        id -> Integer,
-        year -> Integer,
-        name -> Text,
-        power -> Text,
+        id -> Int4,
+        year -> Int4,
+        name -> Varchar,
+        power -> Varchar,
     }
 }

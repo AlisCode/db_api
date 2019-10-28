@@ -21,15 +21,14 @@ mod schema;
 
 use crate::models::Hero;
 
-#[database("rocket_example_sqlite")]
-struct ExampleDb(diesel::SqliteConnection);
+#[database("rocket_example_pgsql")]
+struct ExampleDb(diesel::pg::PgConnection);
 
-type Conn = diesel::r2d2::PooledConnection<
-    diesel::r2d2::ConnectionManager<diesel::sqlite::SqliteConnection>,
->;
-type MyDbRetriever = DbRetriever<diesel::sqlite::Sqlite, ExampleDb>;
+type Conn =
+    diesel::r2d2::PooledConnection<diesel::r2d2::ConnectionManager<diesel::pg::PgConnection>>;
+type MyDbRetriever = DbRetriever<diesel::pg::Pg, ExampleDb>;
 
-impl ConnectionRetriever<diesel::sqlite::Sqlite> for ExampleDb {
+impl ConnectionRetriever<diesel::pg::Pg> for ExampleDb {
     type Output = Conn;
     fn retrieve_connection(self) -> Self::Output {
         self.0
@@ -67,16 +66,13 @@ fn retrievers_str() -> BodyRetriever<String> {
 }
 
 // State handler
-#[derive(Clone)]
 struct Counter {
-    val: Arc<Mutex<u32>>,
+    val: Mutex<u32>,
 }
 
 impl Counter {
     pub fn new() -> Self {
-        Counter {
-            val: Arc::new(Mutex::new(0)),
-        }
+        Counter { val: Mutex::new(0) }
     }
 
     pub fn count(&self) -> u32 {
