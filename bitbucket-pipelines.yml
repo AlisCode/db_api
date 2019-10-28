@@ -21,7 +21,6 @@ definitions:
         script: 
           - cd rocket_example
           - cargo fmt -v --all -- --check
-          - cargo audit
           - cargo build --release
           - cargo test --release
 
