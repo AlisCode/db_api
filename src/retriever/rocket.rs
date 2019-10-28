@@ -1,14 +1,16 @@
+use diesel::backend::Backend;
 use rocket::data::{FromData, Transform};
-use rocket::request::FromParam;
+use rocket::request::{FromParam, FromRequest};
 use rocket::{Data, Outcome, Request, State};
 use rocket_contrib::json::Json;
 use serde::Deserialize;
 use std::borrow::Borrow;
 use std::sync::{Arc, Mutex};
 
+use crate::database::ConnectionRetriever;
 use crate::retriever::{
-    BodyRetriever, DeserializeRetriever, IndexedParamRetriever, Retriever, RetrieverBackend,
-    UniqueStateRetriever,
+    BodyRetriever, DbRetriever, DeserializeRetriever, IndexedParamRetriever, Retriever,
+    RetrieverBackend, StateRetriever, UniqueStateRetriever,
 };
 
 pub struct RocketRetriever<'a, 'r> {
@@ -32,28 +34,22 @@ pub enum RocketRetrieverError {
 
 impl<'a, 'r> RetrieverBackend for RocketRetriever<'a, 'r> {}
 
-/*
-/// 'a is the lifetime of the request,
-/// 'r is the lifetime of the borrowed object
-/// the request ('a) has a lifetime containing 'r
-/// since that struct will be used by the handlers.
 impl<'a, 'r, T> Retriever<RocketRetriever<'a, 'r>, RocketRetrieverError> for StateRetriever<T>
 where
-    T: FromRequest<'a, 'r> + Send + Sync + 'static,
+    T: FromRequest<'a, 'r>,
 {
-    type Output = &'r T;
+    type Output = T;
     fn retrieve(
         &self,
         backend: &RocketRetriever<'a, 'r>,
     ) -> Result<Self::Output, RocketRetrieverError> {
-        match backend.request.guard::<'a, State<'r, T>>() {
-            Outcome::Success(s) => Ok(s.inner()),
+        match backend.request.guard::<'a, T>() {
+            Outcome::Success(s) => Ok(s),
             Outcome::Forward(_) => Err(RocketRetrieverError::Mismatch),
             Outcome::Failure(_) => Err(RocketRetrieverError::Error),
         }
     }
 }
-*/
 
 impl<'a, 'r, T, O, B: 'r> Retriever<RocketRetriever<'a, 'r>, RocketRetrieverError>
     for BodyRetriever<T>
@@ -134,8 +130,25 @@ where
         let res = backend.request.get_param(self.index);
         match res {
             Some(Ok(t)) => Ok(t),
-            Some(Err(e)) => Err(RocketRetrieverError::Error),
+            Some(Err(_)) => Err(RocketRetrieverError::Error),
             _ => Err(RocketRetrieverError::Mismatch),
         }
+    }
+}
+
+impl<'a, 'r, BA, BR> Retriever<RocketRetriever<'a, 'r>, RocketRetrieverError>
+    for DbRetriever<BA, BR>
+where
+    BA: Backend,
+    BR: FromRequest<'a, 'r> + ConnectionRetriever<BA>,
+{
+    type Output = BR::Output;
+    fn retrieve(
+        &self,
+        backend: &RocketRetriever<'a, 'r>,
+    ) -> Result<Self::Output, RocketRetrieverError> {
+        let state_retriever: StateRetriever<BR> = StateRetriever::new();
+        let bridge = state_retriever.retrieve(backend)?;
+        Ok(bridge.retrieve_connection())
     }
 }
