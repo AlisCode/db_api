@@ -1,3 +1,6 @@
+use crate::database::ConnectionRetriever;
+
+use diesel::backend::Backend;
 use serde::Deserialize;
 
 pub trait RetrieverBackend {}
@@ -100,6 +103,22 @@ impl<T> BodyRetriever<T> {
     pub fn new() -> Self {
         BodyRetriever {
             _phantom: std::marker::PhantomData,
+        }
+    }
+}
+
+/// A retriever that returns a Diesel connection for the given Backend
+/// by retrieving the given Bridge
+pub struct DbRetriever<Backend, Bridge> {
+    _phantom_backend: std::marker::PhantomData<Backend>,
+    _phantom_intermediary: std::marker::PhantomData<Bridge>,
+}
+
+impl<BA: Backend, BR: ConnectionRetriever<BA>> DbRetriever<BA, BR> {
+    pub fn new() -> Self {
+        DbRetriever {
+            _phantom_backend: std::marker::PhantomData,
+            _phantom_intermediary: std::marker::PhantomData,
         }
     }
 }

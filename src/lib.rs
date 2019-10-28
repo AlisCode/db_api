@@ -1,6 +1,7 @@
 //! DB API Creator
 //!
 
+pub mod database;
 pub mod endpoint;
 pub mod errors;
 pub mod hooks;
