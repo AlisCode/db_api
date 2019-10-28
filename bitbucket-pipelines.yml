@@ -20,9 +20,9 @@ definitions:
           - postgres
         script: 
           - cd rocket_example
-          - cargo fmt -v --all -- --check
-          - cargo build --release
-          - cargo test --release
+          - cargo +nightly fmt -v --all -- --check
+          - cargo +nightly build --release
+          - cargo +nightly test --release
 
 image: imperocom/impero_rs
 
