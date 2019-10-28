@@ -1,13 +1,40 @@
+#[macro_use]
+extern crate diesel;
+
+use db_api::database::ConnectionRetriever;
 use db_api::endpoint::GenericEndpoint;
 use db_api::mounter::rocket::RocketMounter;
 use db_api::mounter::Mounter;
-use db_api::retriever::IndexedParamRetriever;
-use db_api::retriever::{BodyRetriever, DeserializeRetriever, UniqueStateRetriever};
-use http::Method;
+use db_api::retriever::{
+    BodyRetriever, DbRetriever, DeserializeRetriever, IndexedParamRetriever, UniqueStateRetriever,
+};
+use db_api::Method;
 use rocket::Rocket;
+use rocket_contrib::database;
 use serde::{Deserialize, Serialize};
 
 use std::sync::{Arc, Mutex};
+
+use diesel::prelude::*;
+mod models;
+mod schema;
+
+use crate::models::Hero;
+
+#[database("rocket_example_sqlite")]
+struct ExampleDb(diesel::SqliteConnection);
+
+type Conn = diesel::r2d2::PooledConnection<
+    diesel::r2d2::ConnectionManager<diesel::sqlite::SqliteConnection>,
+>;
+type MyDbRetriever = DbRetriever<diesel::sqlite::Sqlite, ExampleDb>;
+
+impl ConnectionRetriever<diesel::sqlite::Sqlite> for ExampleDb {
+    type Output = Conn;
+    fn retrieve_connection(self) -> Self::Output {
+        self.0
+    }
+}
 
 // Simple handler (Unit retrievers)
 fn handle(_unit: ()) -> String {
@@ -94,6 +121,15 @@ fn retrievers_url_param() -> IndexedParamRetriever<u32> {
     IndexedParamRetriever::new(1)
 }
 
+fn handle_hero_count(conn: Conn) -> String {
+    let heroes: Vec<Hero> = schema::hero::table.load(&conn).unwrap();
+    format!("there are {} heroes", heroes.len())
+}
+
+fn retrievers_hero_count() -> MyDbRetriever {
+    DbRetriever::new()
+}
+
 fn main() {
     let endpoint_test = GenericEndpoint::new("/test".into(), Method::GET, handle, retrievers);
     let endpoint_str =
@@ -114,8 +150,16 @@ fn main() {
         handle_url_param,
         retrievers_url_param,
     );
+    let endpoint_count_heroes = GenericEndpoint::new(
+        "/heroes/count".into(),
+        Method::GET,
+        handle_hero_count,
+        retrievers_hero_count,
+    );
 
-    let rocket = Rocket::ignite().manage(Arc::new(Counter::new()));
+    let rocket = Rocket::ignite()
+        .manage(Arc::new(Counter::new()))
+        .attach(ExampleDb::fairing());
     let mut mounter = RocketMounter::new(rocket);
     mounter.mount_service(endpoint_test.rocket());
     mounter.mount_service(endpoint_str.rocket());
@@ -123,6 +167,7 @@ fn main() {
     mounter.mount_service(endpoint_counter.rocket());
     mounter.mount_service(endpoint_counter_deser.rocket());
     mounter.mount_service(endpoint_url_param.rocket());
+    mounter.mount_service(endpoint_count_heroes.rocket());
     let rocket = mounter.finish();
     rocket.launch();
 }

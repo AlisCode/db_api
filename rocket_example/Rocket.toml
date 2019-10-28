@@ -1,0 +1,2 @@
+[global.databases]
+rocket_example_sqlite = { url = "rocket_example.db" }
