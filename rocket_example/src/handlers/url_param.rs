@@ -4,15 +4,17 @@ use db_api::retriever::IndexedParamRetriever;
 use db_api::service::Service;
 use db_api::Method;
 
-/// URL Param Handler
+/// Showcases URL parsing
 fn handle_url_param(a: u32) -> String {
     format!("The value is {}", a)
 }
 
+/// Retrievers for the URL Param endpoint
 fn retrievers_url_param() -> IndexedParamRetriever<u32> {
     IndexedParamRetriever::new(1)
 }
 
+/// Generates the URL Param endpoint
 pub fn endpoint_url_param<'a, 'r: 'a>() -> impl Service<RocketMounter<'a, 'r>> {
     GenericEndpoint::new(
         "/param/<id>".into(),
