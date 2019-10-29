@@ -23,7 +23,7 @@ definitions:
           - cargo build --release
           - cargo test --release
 
-image: rustlang/rust:nightly-alpine
+image: rustlang/rust:nightly
 
 pipelines:
   default:
