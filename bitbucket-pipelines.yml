@@ -5,31 +5,30 @@ definitions:
       variables:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: passwd
-  steps: 
+  steps:
     - step: &db_api_check
         name: Check that the base crate compiles
-        script: 
+        script:
           - cd db_api
           - cargo fmt -v --all -- --check
-          - cargo audit
           - cargo build --release
           - cargo test --release
     - step: &db_api_rocket
         name: Check that Rocket Integration works
-        services: 
+        services:
           - postgres
-        script: 
+        script:
           - cd rocket_example
-          - cargo +nightly fmt -v --all -- --check
-          - cargo +nightly build --release
-          - cargo +nightly test --release
+          - cargo fmt -v --all -- --check
+          - cargo build --release
+          - cargo test --release
 
-image: imperocom/impero_rs
+image: rustlang/rust:nightly-alpine
 
 pipelines:
   default:
     - parallel:
-      - step:
-          <<: *db_api_check
-      - step:
-          <<: *db_api_rocket
+        - step:
+            <<: *db_api_check
+        - step:
+            <<: *db_api_rocket

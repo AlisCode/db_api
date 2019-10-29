@@ -1,4 +1,4 @@
-version: '3.6'
+version: "3.6"
 
 services:
   db_api_postgres:
@@ -14,15 +14,15 @@ services:
       - 5432:5432
 
   db_api:
-    image: imperocom/impero_rs
-    volumes:
-      - ${BITBUCKET_CLONE_DIR:-.}:/usr/src/impero:delegated
+    image: rustlang/rust:nightly-alpine
     environment:
       RUST_BACKTRACE: 1
     tty: true
+    volumes:
+      - ./db_api:/usr/src/db_api
+      - ./rocket_example:/usr/src/rocket_example
     depends_on:
       - db_api_postgres
 
 volumes:
   postgres_data:
-
