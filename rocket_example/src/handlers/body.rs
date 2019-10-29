@@ -25,6 +25,30 @@ pub fn endpoint_body<'a, 'r: 'a>() -> impl Service<RocketMounter<'a, 'r>> {
 #[cfg(test)]
 #[cfg(debug_assertions)]
 pub mod tests {
+
+    use super::endpoint_body;
+    use db_api::mounter::rocket::RocketMounter;
+    use db_api::mounter::Mounter;
+    use rocket::local::Client;
+    use rocket::Rocket;
+
     #[test]
-    fn it_works() {}
+    fn test_endpoint_body() {
+        // Mounts the endpoint
+        let mut mounter = RocketMounter::new(Rocket::ignite());
+        mounter.mount_service(endpoint_body());
+        let rocket = mounter.finish();
+        let client = Client::new(rocket).expect("The instance of Rocket should be valid");
+
+        // Sends the GET request
+        let req = client.get("/test_str").body("test!");
+        let mut res = req.dispatch();
+
+        // Checks results
+        assert_eq!(res.status(), rocket::http::Status::Ok);
+        assert_eq!(
+            res.body_string().expect("No body on response"),
+            "Handled : test!"
+        );
+    }
 }

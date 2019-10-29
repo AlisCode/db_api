@@ -30,3 +30,49 @@ pub fn endpoint_multiple_retrievers<'a, 'r: 'a>() -> impl Service<RocketMounter<
     )
     .rocket()
 }
+
+#[cfg(test)]
+pub mod tests {
+    use super::endpoint_multiple_retrievers;
+    use crate::Counter;
+
+    use db_api::mounter::rocket::RocketMounter;
+    use db_api::mounter::Mounter;
+    use rocket::local::Client;
+    use rocket::Rocket;
+
+    use std::sync::Arc;
+
+    #[test]
+    fn test_endpoint_multiple_retrievers() {
+        // Mounts the endpoint
+        let mut mounter = RocketMounter::new(Rocket::ignite().manage(Arc::new(Counter::new())));
+        mounter.mount_service(endpoint_multiple_retrievers());
+        let rocket = mounter.finish();
+        let client = Client::new(rocket).expect("The instance of Rocket should be valid");
+
+        // Sends the GET request
+        let req = client
+            .post("/count_deser")
+            .body("{ \"val\": 1, \"other\": 2}");
+        let mut res = req.dispatch();
+
+        assert_eq!(res.status(), rocket::http::Status::Ok);
+        assert_eq!(
+            res.body_string().expect("No body"),
+            "This common count is 1"
+        );
+
+        // Sends the GET request
+        let req = client
+            .post("/count_deser")
+            .body("{ \"val\": 2, \"other\": 5}");
+        let mut res = req.dispatch();
+
+        assert_eq!(res.status(), rocket::http::Status::Ok);
+        assert_eq!(
+            res.body_string().expect("No body"),
+            "This common count is 3"
+        );
+    }
+}

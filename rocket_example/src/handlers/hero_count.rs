@@ -31,3 +31,32 @@ pub fn endpoint_count_heroes<'a, 'r: 'a>() -> impl Service<RocketMounter<'a, 'r>
     )
     .rocket()
 }
+
+/// Don't run on CI because postgres is not setup accordingly on CI for now
+#[cfg(debug_assertions)]
+#[cfg(test)]
+pub mod tests {
+    use super::endpoint_count_heroes;
+    use crate::ExampleDb;
+
+    use db_api::mounter::rocket::RocketMounter;
+    use db_api::mounter::Mounter;
+    use rocket::local::Client;
+    use rocket::Rocket;
+
+    #[test]
+    fn test_endpoint_hero_count() {
+        // Mounts the endpoint
+        let mut mounter = RocketMounter::new(Rocket::ignite().attach(ExampleDb::fairing()));
+        mounter.mount_service(endpoint_count_heroes());
+        let rocket = mounter.finish();
+        let client = Client::new(rocket).expect("The instance of Rocket should be valid");
+
+        // Sends the GET request
+        let req = client.get("/heroes/count");
+        let mut res = req.dispatch();
+
+        assert_eq!(res.status(), rocket::http::Status::Ok);
+        assert_eq!(res.body_string().expect("No body"), "there are 2 heroes");
+    }
+}
