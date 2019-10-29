@@ -42,7 +42,7 @@ impl_retriever_multiple!(A, B, C, D, E, F, G);
 impl_retriever_multiple!(A, B, C, D, E, F, G, H);
 
 pub struct IndexedParamRetriever<T> {
-    index: usize,
+    pub index: usize,
     _phantom: std::marker::PhantomData<T>,
 }
 
@@ -123,5 +123,8 @@ impl<BA: Backend, BR: ConnectionRetriever<BA>> DbRetriever<BA, BR> {
     }
 }
 
-#[cfg(feature = "rocket")]
+#[cfg(feature = "rocket_integ")]
 pub mod rocket;
+
+#[cfg(feature = "actix_integ")]
+pub mod actix;

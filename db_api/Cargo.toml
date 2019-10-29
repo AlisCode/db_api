@@ -12,6 +12,9 @@ http = "0.1.19"
 serde = { version = "1.0.102", features = ["derive"] }
 rocket = { version = "0.4.2", optional = true }
 rocket_contrib = { version = "0.4.2", optional = true }
+actix-web = { version = "1.0.8", optional = true }
+futures = { version ="0.1.25", optional = true }
 
 [features]
 rocket_integ = ["rocket", "rocket_contrib"]
+actix_integ = ["futures", "actix-web"]
