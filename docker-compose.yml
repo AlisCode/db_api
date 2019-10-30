@@ -14,7 +14,7 @@ services:
       - 5432:5432
 
   db_api:
-    image: rustlang/rust:nightly-alpine
+    image: imperocom/impero_rs 
     environment:
       RUST_BACKTRACE: 1
     tty: true

@@ -9,7 +9,8 @@ edition = "2018"
 [dependencies]
 diesel = "1.4.3"
 http = "0.1.19"
-serde = { version = "1.0.102", features = ["derive"] }
+serde = { version = ">=1.0", features = ["derive"] }
+serde_json = ">=1.0,<=1.0.39"
 rocket = { version = "0.4.2", optional = true }
 rocket_contrib = { version = "0.4.2", optional = true }
 actix-web = { version = "1.0.8", optional = true }

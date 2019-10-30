@@ -23,7 +23,7 @@ definitions:
           - cargo build --release
           - cargo test --release
 
-image: rustlang/rust:nightly
+image: imperocom/impero_rs 
 
 pipelines:
   default:
