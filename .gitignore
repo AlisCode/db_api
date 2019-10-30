@@ -2,3 +2,4 @@
 /target_docker
 /.cargo
 **/*.rs.bk
+Cargo.lock
