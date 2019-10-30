@@ -7,6 +7,7 @@ pub mod errors;
 pub mod hooks;
 pub mod mounter;
 pub mod repository;
+pub mod responders;
 pub mod retriever;
 pub mod service;
 
