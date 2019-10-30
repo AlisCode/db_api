@@ -77,8 +77,9 @@ impl<'a, 'r> RocketMounter<'a, 'r> {
 impl<'a, 'r: 'a> Mounter for RocketMounter<'a, 'r> {
     type Back = RocketRetriever<'a, 'r>;
 
-    fn mount_service<S: Service<Self>>(&mut self, service: S) {
+    fn mount_service<S: Service<Self>>(&mut self, service: S) -> &mut Self {
         service.mount_service(self);
+        self
     }
 }
 

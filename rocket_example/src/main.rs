@@ -41,12 +41,13 @@ fn main() {
         .manage(Arc::new(Counter::new()))
         .attach(ExampleDb::fairing());
     let mut mounter = RocketMounter::new(rocket);
-    mounter.mount_service(handlers::endpoint_counter());
-    mounter.mount_service(handlers::endpoint_deser());
-    mounter.mount_service(handlers::endpoint_count_heroes());
-    mounter.mount_service(handlers::endpoint_multiple_retrievers());
-    mounter.mount_service(handlers::endpoint_url_param());
-    mounter.mount_service(handlers::endpoint_void());
+    mounter
+        .mount_service(handlers::endpoint_counter())
+        .mount_service(handlers::endpoint_deser())
+        .mount_service(handlers::endpoint_count_heroes())
+        .mount_service(handlers::endpoint_multiple_retrievers())
+        .mount_service(handlers::endpoint_url_param())
+        .mount_service(handlers::endpoint_void());
     #[cfg(debug_assertions)]
     {
         mounter.mount_service(handlers::body::endpoint_body());

@@ -9,7 +9,7 @@ where
     Self::Back: RetrieverBackend,
 {
     type Back;
-    fn mount_service<S: Service<Self>>(&mut self, service: S)
+    fn mount_service<S: Service<Self>>(&mut self, service: S) -> &mut Self
     where
         Self: Sized;
     fn mount_repository<Repo: Repository>(&mut self, _rep: &Repo) {
