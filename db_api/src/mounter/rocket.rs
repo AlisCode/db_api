@@ -28,7 +28,7 @@ where
         let input: Result<I, RocketRetrieverError> = retrievers.retrieve(&backend);
         match input {
             Ok(i) => Outcome::from(req, (self.handler)(i)),
-            Err(_e) => Outcome::failure(rocket::http::Status::InternalServerError),
+            Err(e) => Outcome::failure(e.into_status()),
         }
     }
 }

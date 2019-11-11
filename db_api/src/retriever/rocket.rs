@@ -30,6 +30,17 @@ impl<'a, 'r> RocketRetriever<'a, 'r> {
 pub enum RocketRetrieverError {
     Mismatch,
     Error,
+    WithStatus(rocket::http::Status),
+}
+
+impl RocketRetrieverError {
+    pub fn into_status(self) -> rocket::http::Status {
+        match self {
+            RocketRetrieverError::Mismatch => rocket::http::Status::BadRequest,
+            RocketRetrieverError::Error => rocket::http::Status::InternalServerError,
+            RocketRetrieverError::WithStatus(s) => s,
+        }
+    }
 }
 
 impl<'a, 'r> RetrieverBackend for RocketRetriever<'a, 'r> {}
@@ -95,7 +106,7 @@ where
         match Json::<T>::from_data(backend.request, outcome) {
             Outcome::Success(s) => Ok(s.into_inner()),
             Outcome::Forward(_) => Err(RocketRetrieverError::Mismatch),
-            Outcome::Failure(_) => Err(RocketRetrieverError::Error),
+            Outcome::Failure((status, _err)) => Err(RocketRetrieverError::WithStatus(status)),
         }
     }
 }

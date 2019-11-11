@@ -11,13 +11,13 @@ impl<T> StreamResponse<T> {
     }
 }
 
-pub struct SerializeResponse<T> {
+pub struct JsonResponse<T> {
     pub inner: T,
 }
 
-impl<T: Serialize> SerializeResponse<T> {
+impl<T: Serialize> JsonResponse<T> {
     pub fn new(inner: T) -> Self {
-        SerializeResponse { inner }
+        JsonResponse { inner }
     }
 }
 

@@ -3,7 +3,7 @@ use rocket::Request;
 use rocket_contrib::json::Json;
 use serde::ser::Serialize;
 
-use crate::responders::{SerializeResponse, StreamResponse};
+use crate::responders::{JsonResponse, StreamResponse};
 
 use std::io::Read;
 
@@ -20,7 +20,7 @@ where
     }
 }
 
-impl<'r, T> Responder<'r> for SerializeResponse<T>
+impl<'r, T> Responder<'r> for JsonResponse<T>
 where
     T: Serialize,
 {
