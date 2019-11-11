@@ -58,18 +58,18 @@ pub mod tests {
         let req = client.post("/deser").body("{ val: 1, other: 2 }");
         let res = req.dispatch();
 
-        assert_eq!(res.status(), rocket::http::Status::InternalServerError);
+        assert_eq!(res.status(), rocket::http::Status::BadRequest);
 
         // Sends the POST request
         let req = client.post("/deser").body("{ \"value\": 1, \"other\": 2 }");
         let res = req.dispatch();
 
-        assert_eq!(res.status(), rocket::http::Status::InternalServerError);
+        assert_eq!(res.status(), rocket::http::Status::UnprocessableEntity);
 
         // Sends the POST request
         let req = client.post("/deser").body("blah");
         let res = req.dispatch();
 
-        assert_eq!(res.status(), rocket::http::Status::InternalServerError);
+        assert_eq!(res.status(), rocket::http::Status::BadRequest);
     }
 }
