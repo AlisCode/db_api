@@ -2,7 +2,7 @@ use std::sync::Mutex;
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Queryable)]
+#[derive(Queryable, Serialize)]
 /// Simple Hero Queryable representation
 pub struct Hero {
     pub id: i32,
