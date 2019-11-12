@@ -10,5 +10,6 @@ pub mod repository;
 pub mod responders;
 pub mod retriever;
 pub mod service;
+pub mod templates;
 
 pub use http::Method;
